@@ -9,13 +9,9 @@ class Venda extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'quantidade_total', 'valor_total'
-    ];
-
     // Relação com Produtos
     public function produtos()
     {
-        return $this->belongsToMany(Produto::class)->withPivot('quantidade');
+        return $this->belongsToMany(Produto::class)->withPivot('quantidade')->withTimestamps();
     }
 }

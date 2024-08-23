@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Produto;
 use App\Models\Venda;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class VendaController extends Controller
 {
@@ -21,29 +22,41 @@ class VendaController extends Controller
             'produtos.*.quantidade' => 'required|numeric|min:1'
         ]);
 
-        // Verificar estoque e calcular totais
-        $total = 0;
-        $items = collect($request->produtos);
-        foreach ($items as $item) {
-            $produto = Produto::findOrFail($item['id']);
-            if ($produto->quantidade < $item['quantidade']) {
-                return response()->json(['error' => 'Quantidade insuficiente para o produto ' . $produto->nome], 400);
-            }
-            $total += $produto->valor * $item['quantidade'];
-            $produto->quantidade -= $item['quantidade']; // decrementa o estoque
-            $produto->save();
+        try {
+            DB::transaction(function () use ($request) {
+                // Cria a venda
+                $venda = new Venda();
+                $venda->save();
+
+                // Itera sobre cada produto para verificar o estoque, atualizar o estoque, e associar à venda
+                foreach ($request->produtos as $item) {
+                    $produto = Produto::findOrFail($item['id']);
+
+                    // Verifica se o estoque está zerado
+                    if ($produto->quantidade <= 0) {
+                        throw new \Exception('Produto ' . $produto->nome . ' está fora de estoque.');
+                    }
+
+                    // Verifica se a quantidade solicitada é maior que o estoque disponível
+                    if ($produto->quantidade < $item['quantidade']) {
+                        throw new \Exception('Quantidade insuficiente para o produto ' . $produto->nome);
+                    }
+
+                    // Atualiza o estoque do produto
+                    $produto->quantidade -= $item['quantidade'];
+                    $produto->save();
+
+                    // Associa o produto à venda na tabela pivô com a quantidade vendida
+                    $venda->produtos()->attach($produto->id, ['quantidade' => $item['quantidade']]);
+                }
+            });
+
+            return response()->json(['message' => 'Venda realizada com sucesso'], 201);
+
+        } catch (\Exception $e) {
+            // Retorna uma resposta de erro se alguma exceção for lançada
+            return response()->json(['error' => $e->getMessage()], 400);
         }
-
-        $venda = new Venda([
-            'quantidade_total' => $items->sum('quantidade'),
-            'valor_total' => $total
-        ]);
-        $venda->save();
-
-        // associar produtos à venda
-        $venda->produtos()->attach($items->pluck('quantidade', 'id'));
-
-        return response()->json($venda, 201);
     }
 
     public function show(Venda $venda)
@@ -54,14 +67,31 @@ class VendaController extends Controller
     public function update(Request $request, Venda $venda)
     {
         // Lógica para atualizar vendas pode ser complexa devido à necessidade de ajustar estoques
-        // Sugerido implementar apenas se necessário
         return response()->json(['message' => 'Update not implemented'], 501);
     }
 
     public function destroy(Venda $venda)
     {
         // A destruição de vendas deve reajustar os estoques dos produtos vendidos
-        // Sugerido implementar cuidadosamente com lógicas de restauração de estoque
         return response()->json(['message' => 'Delete not implemented'], 501);
+    }
+
+    // Método de teste para simular uma venda
+    public function testeVenda()
+    {
+        // Simulando a venda de produtos
+        $vendaData = [
+            'produtos' => [
+                ['id' => 3, 'quantidade' => 499], // Tentando vender 49 unidades do Produto com ID 2
+            ]
+        ];
+
+        // Executando o método store para criar a venda
+        $response = $this->store(new Request($vendaData));
+
+        // Verificando o estoque do produto
+        $produto2 = Produto::find(2);
+
+        return $response;
     }
 }

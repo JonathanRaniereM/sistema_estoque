@@ -19,7 +19,7 @@ Route::apiResource('produtos', ProdutoController::class);
 // Rotas para Categorias
 Route::apiResource('categorias', CategoriaController::class);
 Route::post('/categorias_post', [CategoriaController::class, 'store']);
-
+Route::get('/teste-venda', [VendaController::class, 'testeVenda']);
 
 // Rotas para Vendas
 Route::apiResource('vendas', VendaController::class);

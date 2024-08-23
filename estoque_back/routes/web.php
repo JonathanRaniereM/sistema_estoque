@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\VendaController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -12,7 +13,7 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
-
+Route::get('/teste-venda', [VendaController::class, 'testeVenda']);
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
