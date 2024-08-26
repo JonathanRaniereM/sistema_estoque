@@ -1,6 +1,6 @@
 # Sistema de Estoque Web
 
-<img width="700" src="https://raw.githubusercontent.com/JonathanRaniereM/sistema_otimizacao/main/otimizacao_front/src/views/assets/images/estoque_demonstrativo.gif">
+<img width="700" src="https://raw.githubusercontent.com/JonathanRaniereM/sistema_otimizacao/main/estoque_front/src/views/assets/images/estoque_demonstrativo.gif">
 
 ## Sobre o Projeto
 
