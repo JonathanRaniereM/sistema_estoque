@@ -21,7 +21,7 @@ Este projeto consiste no desenvolvimento de uma aplicação Web de gerenciamento
 
 ### Back-end:
 
-- Crie o banco de dados estoque_back.
+- Crie a base de dados "estoque_back".
 - Execute o comando php artisan migrate para realizar as migrações necessárias.
 - Rode o comando php artisan db:seed para inserir os dados iniciais em Categorias e Produtos.
 - Inicie o servidor PHP com o comando php artisan serve no diretório raiz do back-end porta :8000.
