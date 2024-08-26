@@ -13,13 +13,20 @@ class Produto extends Model
         'nome', 'foto', 'valor', 'categoria_id', 'quantidade'
     ];
 
-    // Relação com Categoria
+    public function getFotoUrlAttribute()
+    {
+        if ($this->foto) {
+            return asset('storage/' . str_replace('public/', '', $this->foto));
+        }
+
+        return null;
+    }
+
     public function categoria()
     {
         return $this->belongsTo(Categoria::class);
     }
 
-    // Relação com Vendas
     public function vendas()
     {
         return $this->belongsToMany(Venda::class)->withPivot('quantidade');

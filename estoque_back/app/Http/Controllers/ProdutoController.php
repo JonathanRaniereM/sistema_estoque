@@ -1,63 +1,102 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\Log;
 
 use App\Models\Produto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ProdutoController extends Controller
 {
-    // GET /produtos
+
     public function index()
     {
-        return Produto::all();
+        return Produto::with('categoria')->get();
     }
 
-    // POST /produtos
+
     public function store(Request $request)
     {
         $request->validate([
             'nome' => 'required',
             'valor' => 'required|numeric',
             'categoria_id' => 'required|exists:categorias,id',
-            'quantidade' => 'required|numeric'
+            'quantidade' => 'required|numeric',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validação para a imagem
         ]);
 
         try {
-            $produto = Produto::create($request->all());
+
+            $produto = new Produto($request->except('foto'));
+
+            if ($request->hasFile('foto')) {
+                $imageName = time().'.'.$request->foto->getClientOriginalExtension();
+                $filePath = $request->foto->storeAs('uploads/produtos', $imageName, 'public');
+                $produto->foto = $filePath;
+            }
+
+
+            $produto->save();
+
             return response()->json($produto, 201);
         } catch (\Exception $e) {
             Log::error('Erro ao criar produto: ' . $e->getMessage());
             return response()->json(['error' => 'Erro ao processar a requisição'], 500);
         }
-
     }
 
-    // GET /produtos/{produto}
+
+
     public function show(Produto $produto)
     {
         return $produto;
     }
 
-    // PUT/PATCH /produtos/{produto}
+
     public function update(Request $request, Produto $produto)
     {
         $request->validate([
             'nome' => 'required',
             'valor' => 'required|numeric',
             'categoria_id' => 'exists:categorias,id',
-            'quantidade' => 'required|numeric'
+            'quantidade' => 'required|numeric',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validação para a imagem
         ]);
 
-        $produto->update($request->all());
-        return response()->json($produto, 200);
+        try {
+            $produto->fill($request->except('foto'));
+
+            if ($request->hasFile('foto')) {
+                $imageName = time().'.'.$request->foto->getClientOriginalExtension();
+                $filePath = $request->foto->storeAs('uploads/produtos', $imageName, 'public'); // Guardar na pasta public e salvar o caminho correto
+                $produto->foto = $filePath;
+            }
+
+            $produto->save();
+
+            return response()->json($produto, 200);
+        } catch (\Exception $e) {
+            Log::error('Erro ao atualizar produto: ' . $e->getMessage());
+            return response()->json(['error' => 'Erro ao processar a requisição'], 500);
+        }
     }
 
-    // DELETE /produtos/{produto}
+
     public function destroy(Produto $produto)
     {
-        $produto->delete();
-        return response()->json(null, 204);
+        try {
+
+            if ($produto->foto && file_exists(public_path($produto->foto))) {
+                unlink(public_path($produto->foto));
+            }
+
+            $produto->delete();
+
+            return response()->json(null, 204);
+        } catch (\Exception $e) {
+            Log::error('Erro ao excluir produto: ' . $e->getMessage());
+            return response()->json(['error' => 'Erro ao processar a requisição'], 500);
+        }
     }
+
 }

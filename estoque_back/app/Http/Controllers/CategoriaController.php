@@ -30,7 +30,6 @@ class CategoriaController extends Controller
         return response()->json($categoria, 201);
     }
 
-
     public function show(Categoria $categoria)
     {
         return $categoria;
