@@ -1,4 +1,4 @@
-# Sistema Otimização Não Linear
+# Sistema de Estoque Web
 
 <img width="700" src="https://raw.githubusercontent.com/JonathanRaniereM/sistema_otimizacao/main/otimizacao_front/src/views/assets/images/estoque_demonstrativo.gif">
 
@@ -19,14 +19,14 @@ Este projeto consiste no desenvolvimento de uma aplicação Web de gerenciamento
 
 ## Executando o Projeto
 
-# Back-end:
+### Back-end:
 
 - Crie o banco de dados estoque_back.
 - Execute o comando php artisan migrate para realizar as migrações necessárias.
 - Rode o comando php artisan db:seed para inserir os dados iniciais em Categorias e Produtos.
 - Inicie o servidor PHP com o comando php artisan serve no diretório raiz do back-end porta :8000.
 
-# Front-end:
+### Front-end:
 
 - No diretório raiz do front-end, execute npm install para instalar as dependências.
 - Configure as variáveis de ambiente conforme necessário.
